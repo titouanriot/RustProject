@@ -1,28 +1,36 @@
+use reqwest::Url;
+use http::Uri;
+use std::borrow::Cow;
 
-/*use reqwest;
+fn get_params_by_url(req: String) -> Vec<(String, String)> {
+  let uri = req.parse::<Uri>().unwrap();
 
-// tokio let's us use "async" on our main function
+  let tmp = Url::parse(&uri.to_string()).unwrap();
+  let params = tmp.query_pairs();
 
-async fn main() {
-    let mut note = String::new();
-    
-    // chaining .await will yield our query result
-    let result = reqwest::get("http://127.0.0.1:5500").await;
-    println!("{:?}", result);
-}*/
-use reqwest::Client;
-#[tokio::main]
-async fn main() {
-  let res = Client::new()
-      .get("http://127.0.0.1:5500/javascript/hello.html")
-      .send()
-      .await
-      .expect("failed to get response")
-      .text()
-      .await
-      .expect("failed to get payload");
+  let vec_params = params.collect::<Vec<(Cow<'_, str>, Cow<'_, str>)>>();
 
-  println!("{}", res);
+  let mut res = vec![];
+  for vp in vec_params {
+    res.push((String::from(vp.0), String::from(vp.1)));
+  }
+  
+  return res;
 }
 
+#[tokio::main]
+async fn main() {
+  /*let params = [("foo", "kjj"), ("baz", "quux")];
+  let resp = Client::new()
+    .post("http://127.0.0.1:5500/test.html?foo=1&bar=2")
+    .form(&params)
+    .body("the exact body that is sent")
+    .send()
+    .await;*/
 
+  let request = String::from("http://127.0.0.1:5500/test.html?foo=value1&bar=value2");
+
+  let resp = get_params_by_url(request);
+
+  dbg!(resp);
+}
